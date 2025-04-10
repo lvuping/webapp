@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import fs from 'fs/promises'; // Import the promises version of fs
 import { fileURLToPath } from 'url';
 import { scrapeNaverBlog, saveDataToJson } from './search.js'; // Import functions from search.js
 
@@ -15,9 +16,9 @@ app.use(express.json());
 // Serve static files from the current directory (e.g., index.html, main.html)
 app.use(express.static(__dirname));
 
-// Route to serve main.html at the root
+// Route to serve index.html at the root
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'main.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // API endpoint to run the Naver search
@@ -60,6 +61,25 @@ app.post('/api/run-naver-search', async (req, res) => {
     res.status(500).json({ success: false, message: `Server error during search: ${error.message}` });
   }
 });
+
+// API endpoint to list JSON files in the result directory
+app.get('/api/results', async (req, res) => {
+  const resultsDir = path.join(__dirname, 'result');
+  try {
+    const files = await fs.readdir(resultsDir);
+    const jsonFiles = files.filter(file => path.extname(file).toLowerCase() === '.json');
+    res.json({ success: true, files: jsonFiles });
+  } catch (error) {
+    console.error('Error reading result directory:', error);
+    // Check if the error is because the directory doesn't exist
+    if (error.code === 'ENOENT') {
+      res.status(404).json({ success: false, message: 'Result directory not found.' });
+    } else {
+      res.status(500).json({ success: false, message: 'Server error reading result files.' });
+    }
+  }
+});
+
 
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);

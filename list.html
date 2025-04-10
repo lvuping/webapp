@@ -96,6 +96,21 @@
             <h1 class="text-3xl font-bold text-gray-900">데이터 개요</h1> <!-- Darker text, larger size -->
         </header>
 
+        <!-- Filter Section -->
+        <div id="filter-container" class="mb-6 p-4 bg-white rounded-lg shadow-sm">
+             <h2 class="text-lg font-semibold mb-3 text-gray-700">필터</h2>
+             <div class="flex flex-wrap gap-2" id="keyword-filters">
+                 <span class="text-sm font-medium text-gray-500 w-full mb-1">키워드:</span>
+                 <!-- Keyword buttons will be loaded here -->
+             </div>
+             <div class="flex flex-wrap gap-2 mt-3" id="region-filters">
+                 <span class="text-sm font-medium text-gray-500 w-full mb-1">지역:</span>
+                 <!-- Region buttons will be loaded here -->
+             </div>
+             <button id="show-all-btn" class="mt-3 px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300 transition">전체 보기</button>
+        </div>
+        <!-- End Filter Section -->
+
         <div id="data-container" class="bg-white rounded-lg shadow-md overflow-hidden"> <!-- Added shadow-md, rounded-lg -->
             <!-- Data will be loaded here -->
             <div id="loading" class="p-8 text-center text-gray-600">데이터 로딩 중...</div> <!-- Increased padding -->
@@ -120,15 +135,19 @@
         const completeButton = document.getElementById('complete-btn');
         const selectedCountSpan = document.getElementById('selected-count');
 
-        const filePaths = [
-            'result/dummy001.json',
-            'result/dummy002.json',
-            'result/dummy003.json',
-            'result/보일러수리_원주_2025-04-10T16-20-50.json' // Added this line
-        ];
+        // Removed hardcoded filePaths array
 
         let allData = {}; // Store data keyed by file path
         let selectedItems = new Set(); // Store unique IDs of selected items
+        let uniqueKeywords = new Set();
+        let uniqueRegions = new Set();
+        let currentFilter = { keyword: null, region: null }; // To store active filters
+
+        const filterContainer = document.getElementById('filter-container');
+        const keywordFiltersContainer = document.getElementById('keyword-filters');
+        const regionFiltersContainer = document.getElementById('region-filters');
+        const showAllButton = document.getElementById('show-all-btn');
+
 
         async function fetchData(filePath) {
             try {
@@ -143,47 +162,137 @@
             }
         }
 
+        function renderFilters() {
+            // Clear existing buttons except labels
+            keywordFiltersContainer.innerHTML = '<span class="text-sm font-medium text-gray-500 w-full mb-1">키워드:</span>';
+            regionFiltersContainer.innerHTML = '<span class="text-sm font-medium text-gray-500 w-full mb-1">지역:</span>';
+
+            if (uniqueKeywords.size === 0 && uniqueRegions.size === 0) {
+                filterContainer.classList.add('hidden'); // Hide filters if none found
+                return;
+            } else {
+                 filterContainer.classList.remove('hidden');
+            }
+
+            // Sort for consistent order
+            const sortedKeywords = Array.from(uniqueKeywords).sort();
+            const sortedRegions = Array.from(uniqueRegions).sort();
+
+            sortedKeywords.forEach(keyword => {
+                const button = document.createElement('button');
+                button.textContent = keyword;
+                button.dataset.keyword = keyword;
+                button.className = `filter-btn keyword-btn px-3 py-1 rounded text-sm transition ${currentFilter.keyword === keyword ? 'bg-blue-500 text-white font-semibold' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'}`;
+                button.addEventListener('click', () => applyFilter('keyword', keyword));
+                keywordFiltersContainer.appendChild(button);
+            });
+
+            sortedRegions.forEach(region => {
+                const button = document.createElement('button');
+                button.textContent = region;
+                button.dataset.region = region;
+                 button.className = `filter-btn region-btn px-3 py-1 rounded text-sm transition ${currentFilter.region === region ? 'bg-green-500 text-white font-semibold' : 'bg-green-100 text-green-700 hover:bg-green-200'}`;
+                button.addEventListener('click', () => applyFilter('region', region));
+                regionFiltersContainer.appendChild(button);
+            });
+        }
+
+        function applyFilter(type, value) {
+            // If clicking the same filter again, remove it
+            if (currentFilter[type] === value) {
+                currentFilter[type] = null;
+            } else {
+                currentFilter[type] = value;
+            }
+            renderData(); // Re-render data with the new filter
+            renderFilters(); // Re-render filters to update active styles
+        }
+
+        function clearFilters() {
+            currentFilter = { keyword: null, region: null };
+            renderData();
+            renderFilters();
+        }
+
+
         function renderData() {
             dataContainer.innerHTML = ''; // Clear previous content
+            loadingIndicator.classList.add('hidden'); // Hide loading initially if called again
 
-            filePaths.forEach(filePath => {
-                const data = allData[filePath];
-                if (!data || data.length === 0) return; // Skip if no data for this file
+            let filteredItemCount = 0;
+            const filePathsToRender = Object.keys(allData);
 
-                // --- Create File Header with Keyword and City ---
+            if (filePathsToRender.length === 0) {
+                dataContainer.innerHTML = '<div class="p-8 text-center text-gray-500">결과 폴더에 표시할 JSON 파일이 없습니다.</div>';
+                return;
+            }
+
+            filePathsToRender.forEach(filePath => {
+                const originalData = allData[filePath];
+                if (!originalData || originalData.length === 0) return;
+
+                // Filter data based on currentFilter
+                const filteredData = originalData.filter(item => {
+                    const keywordMatch = !currentFilter.keyword || (item.keyword && item.keyword.toLowerCase() === currentFilter.keyword.toLowerCase());
+                    // Ensure city comparison is also case-insensitive
+                    const regionMatch = !currentFilter.region || (item.city && item.city.toLowerCase() === currentFilter.region.toLowerCase());
+                    return keywordMatch && regionMatch;
+                });
+
+                if (filteredData.length === 0) return; // Skip rendering this file if no items match the filter
+
+                filteredItemCount += filteredData.length;
+
+                // --- Create File Header ---
+                 // Show filtered count in header if filters are active
+                const isFiltered = currentFilter.keyword || currentFilter.region;
+                const countText = isFiltered ? `${filteredData.length} / ${originalData.length}개 항목` : `${originalData.length}개 항목`;
+
                 const fileHeader = document.createElement('div');
                 fileHeader.className = 'file-header';
 
-                // Extract keyword and city from the first item (if available)
-                const firstItem = data[0];
+                // Extract keyword and city from the first item of the *original* data for the header
                 let headerText = filePath; // Default to file path
-                if (firstItem && firstItem.keyword && firstItem.city) {
-                    headerText = `${firstItem.keyword} - ${firstItem.city}`;
-                } else if (firstItem && firstItem.keyword) {
-                     headerText = firstItem.keyword; // Fallback if city is missing
-                } else if (firstItem && firstItem.city) {
-                     headerText = firstItem.city; // Fallback if keyword is missing
+                if (originalData && originalData.length > 0) { // Check if originalData exists and is not empty
+                    const firstItem = originalData[0];
+                    if (firstItem && firstItem.keyword && firstItem.city) {
+                        headerText = `${firstItem.keyword} - ${firstItem.city}`;
+                    } else if (firstItem && firstItem.keyword) {
+                        headerText = firstItem.keyword; // Fallback if city is missing
+                    } else if (firstItem && firstItem.city) {
+                        headerText = firstItem.city; // Fallback if keyword is missing
+                    }
                 }
                  // Add count of items in the file
-                headerText += ` (${data.length}개 항목)`;
+                headerText += ` (${countText})`; // Use dynamic count text
 
                 fileHeader.textContent = headerText;
                 dataContainer.appendChild(fileHeader);
                 // --- End File Header Creation ---
 
-                // Add data items
-                data.forEach((item, index) => {
-                    // Generate a unique ID for selection tracking
-                    const uniqueId = `${filePath}-${index}`; // Use index as ID within the file
+                // Add filtered data items
+                filteredData.forEach((item) => {
+                     // Find the original index for consistent ID generation
+                    const originalIndex = originalData.findIndex(originalItem => originalItem === item); // Find based on object reference
+                    if (originalIndex === -1) {
+                        console.warn("Could not find original index for item:", item);
+                        return; // Skip if we can't find the original index (should not happen ideally)
+                    }
+                    const uniqueId = `${filePath}-${originalIndex}`; // Use original index for ID
 
                     const itemElement = document.createElement('div');
                     itemElement.className = 'data-item';
                     itemElement.dataset.id = uniqueId;
                     itemElement.dataset.filePath = filePath;
-                    itemElement.dataset.index = index; // Store original index
+                    itemElement.dataset.index = originalIndex; // Store original index
 
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
+                    // Check if this item was previously selected
+                    checkbox.checked = selectedItems.has(uniqueId);
+                    if (checkbox.checked) {
+                        itemElement.classList.add('selected'); // Re-apply selected style if needed
+                    }
                     checkbox.dataset.id = uniqueId;
                     checkbox.addEventListener('change', handleSelectionChange);
 
@@ -217,6 +326,11 @@
                     dataContainer.appendChild(itemElement);
                 });
             });
+
+            // Add message if no items match the current filter but there is data overall
+            if (filteredItemCount === 0 && filePathsToRender.length > 0 && Object.keys(allData).length > 0) {
+                 dataContainer.innerHTML = '<div class="p-8 text-center text-gray-500">선택한 필터와 일치하는 항목이 없습니다.</div>';
+            }
         }
 
         function handleSelectionChange(event) {
@@ -338,23 +452,70 @@
 
         async function loadAllData() {
             loadingIndicator.classList.remove('hidden');
-            dataContainer.innerHTML = ''; // Clear previous data/headers
+            dataContainer.innerHTML = '<div id="loading" class="p-8 text-center text-gray-600">데이터 로딩 중...</div>'; // Show loading
+            allData = {}; // Clear previous data
+            uniqueKeywords.clear(); // Clear previous filters
+            uniqueRegions.clear(); // Clear previous filters
+            currentFilter = { keyword: null, region: null }; // Reset filters on load
 
-            const promises = filePaths.map(async (filePath) => {
-                const data = await fetchData(filePath);
-                allData[filePath] = data; // Store fetched data
-            });
+            try {
+                // 1. Fetch the list of JSON filenames from the server
+                const response = await fetch('/api/results');
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: 'Failed to fetch file list.' }));
+                    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+                }
+                const result = await response.json();
 
-            await Promise.all(promises);
+                if (!result.success || !result.files || result.files.length === 0) {
+                    loadingIndicator.classList.add('hidden');
+                    dataContainer.innerHTML = '<div class="p-8 text-center text-gray-500">결과 폴더에서 JSON 파일을 찾을 수 없습니다.</div>';
+                    updateActionButtons();
+                    return;
+                }
 
-            loadingIndicator.classList.add('hidden');
-            renderData();
-            updateActionButtons(); // Initial state
+                const fetchedFilePaths = result.files.map(filename => `result/${filename}`); // Construct full paths
+
+                // 2. Fetch data for each file
+                const promises = fetchedFilePaths.map(async (filePath) => {
+                    const data = await fetchData(filePath);
+                    if (data && data.length > 0) { // Only store if data is valid and not empty
+                       allData[filePath] = data;
+                    } else {
+                        console.warn(`No valid data found or empty file: ${filePath}`);
+                    }
+                });
+
+                await Promise.all(promises);
+
+                // 3. Extract unique keywords and regions from all loaded data
+                Object.values(allData).flat().forEach(item => {
+                    if (item.keyword) uniqueKeywords.add(item.keyword);
+                    if (item.city) uniqueRegions.add(item.city); // Assuming 'city' is the field for region
+                });
+
+                // 4. Render filters and then data
+                renderFilters(); // Render filter buttons first
+                renderData(); // Render data (initially unfiltered)
+
+            } catch (error) {
+                console.error('Error loading data:', error);
+                renderFilters(); // Still try to render filters even on error? Maybe hide them.
+                filterContainer.classList.add('hidden'); // Hide filters on error
+                loadingIndicator.classList.add('hidden');
+                dataContainer.innerHTML = `<div class="p-8 text-center text-red-600">데이터 로딩 실패: ${error.message}</div>`;
+            } finally {
+                 // Ensure loading indicator is hidden even if renderData clears it
+                const currentLoading = dataContainer.querySelector('#loading');
+                if (currentLoading) currentLoading.classList.add('hidden');
+                updateActionButtons(); // Update button visibility
+            }
         }
 
         // Add event listeners to buttons
         deleteButton.addEventListener('click', deleteSelectedItems);
         completeButton.addEventListener('click', markSelectedItemsComplete);
+        showAllButton.addEventListener('click', clearFilters); // Add listener for show all
 
         // Initial load
         loadAllData();
