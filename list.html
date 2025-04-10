@@ -7,71 +7,83 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            font-family: 'Inter', sans-serif; /* Using a nicer sans-serif font */
+            font-family: 'Inter', sans-serif;
         }
         .data-item {
-            display: flex;
+            display: grid; /* Use grid for column layout */
+            grid-template-columns: auto 1fr auto auto; /* Checkbox, Title, Details, Status */
             align-items: center;
-            /* Increased padding for better spacing */
-            padding: 12px 16px;
-            border-bottom: 1px solid #e5e7eb; /* Tailwind gray-200 */
+            gap: 16px; /* Gap between columns */
+            padding: 10px 12px; /* Reduced padding */
+            border-bottom: 1px solid #e5e7eb;
             transition: background-color 0.2s;
         }
         .data-item:hover {
-            background-color: #f3f4f6; /* Tailwind gray-100 */
+            background-color: #f3f4f6;
         }
         .data-item.selected {
-            background-color: #dbeafe; /* Tailwind blue-100 */
+            background-color: #dbeafe;
         }
         .data-item input[type="checkbox"] {
-            margin-right: 16px; /* Increased margin */
-            flex-shrink: 0;
+            margin-right: 0; /* Remove margin, use grid gap */
+            grid-column: 1 / 2; /* Place in first column */
         }
-        .data-item > div {
-            flex-grow: 1;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px; /* Increased gap */
-            overflow: hidden; /* Prevent long text from breaking layout */
-        }
+        /* Removed .data-item > div as grid handles layout now */
         .data-item .title {
-            font-weight: 600; /* Slightly bolder */
+            font-weight: 600;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            flex-basis: 45%; /* Adjusted basis */
+            grid-column: 2 / 3; /* Place in second column */
         }
         .data-item .details {
-            font-size: 0.9em;
-            color: #4b5563; /* Tailwind gray-600 */
+            font-size: 0.85em; /* Slightly smaller */
+            color: #4b5563;
             white-space: nowrap;
-            flex-shrink: 0; /* Prevent shrinking */
+            grid-column: 3 / 4; /* Place in third column */
+            display: flex; /* Use flex for tags inside */
+            gap: 6px; /* Gap between tags */
         }
+        /* Tag styling for details */
+        .tag {
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .tag-region { background-color: #e0f2fe; color: #0c4a6e; } /* Light Blue */
+        .tag-keyword { background-color: #dcfce7; color: #166534; } /* Light Green */
+        .tag-date { background-color: #f3f4f6; color: #4b5563; } /* Light Gray */
+
         .data-item .status {
             font-size: 0.8em;
-            padding: 3px 8px; /* Slightly larger padding */
-            border-radius: 6px; /* More rounded */
+            padding: 3px 8px;
+            border-radius: 6px;
             white-space: nowrap;
-            flex-shrink: 0;
             font-weight: 500;
+            grid-column: 4 / 5; /* Place in fourth column */
+            justify-self: end; /* Align status to the right */
         }
         .status-extracted {
-            background-color: #dcfce7; /* Tailwind green-100 */
-            color: #166534; /* Tailwind green-800 */
+            background-color: #dcfce7;
+            color: #166534;
         }
         .status-pending {
-            background-color: #fef9c3; /* Tailwind yellow-100 */
-            color: #854d0e; /* Tailwind yellow-800 */
+            background-color: #fef9c3;
+            color: #854d0e;
         }
         .file-header {
-            background-color: #e5e7eb; /* Tailwind gray-200 */
-            padding: 10px 16px; /* Increased padding */
-            font-weight: 600; /* Bolder */
-            margin-top: 20px; /* Increased margin */
-            border-bottom: 2px solid #d1d5db; /* Tailwind gray-300 */
-            color: #374151; /* Tailwind gray-700 */
-            font-size: 1.1em; /* Slightly larger font */
+            background-color: #e5e7eb;
+            padding: 8px 12px; /* Reduced padding */
+            font-weight: 600;
+            margin-top: 16px; /* Reduced margin */
+            border-bottom: 2px solid #d1d5db;
+            color: #374151;
+            font-size: 1.05em; /* Slightly smaller */
+            cursor: pointer; /* Add pointer cursor */
+            transition: background-color 0.2s;
+        }
+        .file-header:hover {
+            background-color: #d1d5db; /* Darken on hover */
         }
         #action-buttons {
             position: sticky;
@@ -90,10 +102,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-100"> <!-- Slightly darker background -->
-    <div class="container mx-auto p-4 sm:p-8"> <!-- Increased padding -->
-        <header class="mb-8"> <!-- Increased margin -->
-            <h1 class="text-3xl font-bold text-gray-900">데이터 개요</h1> <!-- Darker text, larger size -->
+<body class="bg-gray-100">
+    <div class="container mx-auto p-2 sm:p-4"> <!-- Reduced padding for left shift -->
+        <header class="mb-6"> <!-- Reduced margin -->
+            <h1 class="text-2xl font-bold text-gray-900">데이터 개요</h1> <!-- Slightly smaller -->
         </header>
 
         <!-- Filter Section -->
@@ -139,6 +151,7 @@
 
         let allData = {}; // Store data keyed by file path
         let selectedItems = new Set(); // Store unique IDs of selected items
+        let lastCheckedCheckbox = null; // To track the last checkbox clicked for shift-select
         let uniqueKeywords = new Set();
         let uniqueRegions = new Set();
         let currentFilter = { keyword: null, region: null }; // To store active filters
@@ -250,10 +263,11 @@
 
                 const fileHeader = document.createElement('div');
                 fileHeader.className = 'file-header';
+                fileHeader.dataset.filePath = filePath; // Add data attribute for identification
 
                 // Extract keyword and city from the first item of the *original* data for the header
                 let headerText = filePath; // Default to file path
-                if (originalData && originalData.length > 0) { // Check if originalData exists and is not empty
+                if (originalData && originalData.length > 0) {
                     const firstItem = originalData[0];
                     if (firstItem && firstItem.keyword && firstItem.city) {
                         headerText = `${firstItem.keyword} - ${firstItem.city}`;
@@ -264,9 +278,10 @@
                     }
                 }
                  // Add count of items in the file
-                headerText += ` (${countText})`; // Use dynamic count text
+                headerText += ` (${countText})`;
 
                 fileHeader.textContent = headerText;
+                fileHeader.addEventListener('click', handleHeaderClick); // Add click listener
                 dataContainer.appendChild(fileHeader);
                 // --- End File Header Creation ---
 
@@ -288,24 +303,29 @@
 
                     const checkbox = document.createElement('input');
                     checkbox.type = 'checkbox';
-                    // Check if this item was previously selected
                     checkbox.checked = selectedItems.has(uniqueId);
                     if (checkbox.checked) {
-                        itemElement.classList.add('selected'); // Re-apply selected style if needed
+                        itemElement.classList.add('selected');
                     }
                     checkbox.dataset.id = uniqueId;
+                    checkbox.dataset.filePath = filePath; // Add file path to checkbox for grouping
                     checkbox.addEventListener('change', handleSelectionChange);
 
-                    const contentDiv = document.createElement('div');
+                    // No contentDiv needed with grid
 
                     const titleSpan = document.createElement('span');
                     titleSpan.className = 'title';
                     titleSpan.textContent = item.title;
-                    titleSpan.title = item.title; // Show full title on hover
+                    titleSpan.title = item.title;
 
+                    // Create details with tags
                     const detailsSpan = document.createElement('span');
                     detailsSpan.className = 'details';
-                    detailsSpan.textContent = `${item.city} | ${item.keyword} | ${item.fromDate} ~ ${item.toDate}`;
+                    detailsSpan.innerHTML = `
+                        <span class="tag tag-region">${item.city || 'N/A'}</span>
+                        <span class="tag tag-keyword">${item.keyword || 'N/A'}</span>
+                        <span class="tag tag-date">${item.fromDate || ''} ~ ${item.toDate || ''}</span>
+                    `;
 
                     const statusSpan = document.createElement('span');
                     statusSpan.className = 'status';
@@ -317,12 +337,11 @@
                         statusSpan.textContent = '대기';
                     }
 
-                    contentDiv.appendChild(titleSpan);
-                    contentDiv.appendChild(detailsSpan);
-                    contentDiv.appendChild(statusSpan);
-
+                    // Append elements directly to the grid item
                     itemElement.appendChild(checkbox);
-                    itemElement.appendChild(contentDiv);
+                    itemElement.appendChild(titleSpan);
+                    itemElement.appendChild(detailsSpan);
+                    itemElement.appendChild(statusSpan);
                     dataContainer.appendChild(itemElement);
                 });
             });
@@ -334,19 +353,95 @@
         }
 
         function handleSelectionChange(event) {
-            const checkbox = event.target;
-            const uniqueId = checkbox.dataset.id;
-            const itemElement = document.querySelector(`.data-item[data-id="${uniqueId}"]`);
+            const currentCheckbox = event.target;
+            const uniqueId = currentCheckbox.dataset.id;
+            const currentItemElement = document.querySelector(`.data-item[data-id="${uniqueId}"]`);
 
-            if (checkbox.checked) {
-                selectedItems.add(uniqueId);
-                itemElement.classList.add('selected');
+            // Get all currently visible checkboxes in the data container
+            const allCheckboxes = Array.from(dataContainer.querySelectorAll('.data-item input[type="checkbox"]'));
+
+            if (lastCheckedCheckbox && event.shiftKey) {
+                // Shift key is pressed, select range
+                const startIndex = allCheckboxes.indexOf(lastCheckedCheckbox);
+                const endIndex = allCheckboxes.indexOf(currentCheckbox);
+
+                // Determine the actual start and end for iteration
+                const lowerIndex = Math.min(startIndex, endIndex);
+                const upperIndex = Math.max(startIndex, endIndex);
+
+                for (let i = lowerIndex; i <= upperIndex; i++) {
+                    const checkboxInRange = allCheckboxes[i];
+                    const itemElementInRange = checkboxInRange.closest('.data-item'); // Find parent item
+                    const idInRange = checkboxInRange.dataset.id;
+
+                    if (checkboxInRange && itemElementInRange) {
+                        // Set checked state to match the currently clicked checkbox
+                        checkboxInRange.checked = currentCheckbox.checked;
+
+                        // Update selectedItems set and visual style
+                        if (currentCheckbox.checked) {
+                            selectedItems.add(idInRange);
+                            itemElementInRange.classList.add('selected');
+                        } else {
+                            selectedItems.delete(idInRange);
+                            itemElementInRange.classList.remove('selected');
+                        }
+                    }
+                }
             } else {
-                selectedItems.delete(uniqueId);
-                itemElement.classList.remove('selected');
+                // Normal click (no shift or no previous check)
+                if (currentCheckbox.checked) {
+                    selectedItems.add(uniqueId);
+                    currentItemElement.classList.add('selected');
+                } else {
+                    selectedItems.delete(uniqueId);
+                    currentItemElement.classList.remove('selected');
+                }
+                // Update lastCheckedCheckbox only on non-shift clicks
+                lastCheckedCheckbox = currentCheckbox;
             }
+
             updateActionButtons();
         }
+
+        // --- New Function for Header Click ---
+        function handleHeaderClick(event) {
+            const headerElement = event.currentTarget;
+            const filePath = headerElement.dataset.filePath;
+
+            // Find all checkboxes belonging to this file group that are currently visible
+            const checkboxesInGroup = Array.from(dataContainer.querySelectorAll(`.data-item input[type="checkbox"][data-file-path="${filePath}"]`));
+
+            if (checkboxesInGroup.length === 0) return; // No checkboxes to toggle
+
+            // Determine if we should check or uncheck all
+            // Check if *all* checkboxes in the group are already checked
+            const allChecked = checkboxesInGroup.every(cb => cb.checked);
+            const shouldCheck = !allChecked; // If all are checked, we uncheck; otherwise, we check
+
+            checkboxesInGroup.forEach(checkbox => {
+                const uniqueId = checkbox.dataset.id;
+                const itemElement = checkbox.closest('.data-item');
+
+                if (checkbox.checked !== shouldCheck) { // Only change if needed
+                    checkbox.checked = shouldCheck;
+
+                    // Update selectedItems set and visual style
+                    if (shouldCheck) {
+                        selectedItems.add(uniqueId);
+                        itemElement.classList.add('selected');
+                    } else {
+                        selectedItems.delete(uniqueId);
+                        itemElement.classList.remove('selected');
+                    }
+                }
+            });
+
+            // Reset lastCheckedCheckbox after a group toggle to avoid unexpected shift-click behavior
+            lastCheckedCheckbox = null;
+            updateActionButtons(); // Update the count and button visibility
+        }
+        // --- End New Function ---
 
         function updateActionButtons() {
             const count = selectedItems.size;
