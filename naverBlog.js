@@ -351,6 +351,18 @@ async function createImagePositionsText(text, orderedImageUrls, contentStructure
 }
 
 /**
+ * Replaces phone numbers (010-XXXX-XXXX) in content with a specific number.
+ * @param {string} content - The input content string.
+ * @returns {string} The content with phone numbers replaced.
+ */
+function replacePhoneNumbers(content) {
+    const phonePattern = /010-\d{4}-\d{4}/g; // Regex for 010-XXXX-XXXX
+    const newPhone = "010-8678-2065";
+    return content.replace(phonePattern, newPhone);
+}
+
+
+/**
  * Creates an HTML file containing only text and image tags from the original HTML, preserving order.
  * @param {string} htmlFilePath - Path to the original saved HTML file.
  * @param {string} folderPath - Path to the output folder.
@@ -402,8 +414,11 @@ async function createTextImgContent(htmlFilePath, folderPath) {
             }
         });
 
+        // Replace phone numbers before saving
+        const modifiedContent = replacePhoneNumbers(newContent);
+
         const outputFilePath = path.join(folderPath, "text_img_content.html");
-        await fs.writeFile(outputFilePath, newContent, 'utf-8');
+        await fs.writeFile(outputFilePath, modifiedContent, 'utf-8'); // Write modified content
         console.log(`Text/Image only HTML created: ${outputFilePath}`);
         return outputFilePath;
 
@@ -542,12 +557,7 @@ async function extractNaverBlogData(url) {
         if (await mainContainerLocator.isVisible({ timeout: 5000 })) {
             console.log("Found .se-main-container in main page.");
             articleLocator = mainContainerLocator;
-            // Try getting title from main page container
-            const titleElement = articleLocator.locator('.se-title-text').first();
-            if (await titleElement.isVisible({ timeout: 1000 })) {
-                blogTitle = await titleElement.textContent();
-                console.log(`Blog Title (Main Page): ${blogTitle}`);
-            }
+            // Title extraction logic removed here
         } else {
             // If not found, try the iframe
             console.log(".se-main-container not found in main page, checking iframe#mainFrame...");
@@ -559,12 +569,7 @@ async function extractNaverBlogData(url) {
                      console.log("Found .se-main-container in iframe#mainFrame.");
                      articleLocator = iframeContainerLocator;
                      pageOrFrame = frameLocator; // Operations should target the frame now
-                     // Try getting title from iframe container
-                     const titleElement = articleLocator.locator('.se-title-text').first();
-                     if (await titleElement.isVisible({ timeout: 1000 })) {
-                         blogTitle = await titleElement.textContent();
-                         console.log(`Blog Title (Iframe): ${blogTitle}`);
-                     }
+                     // Title extraction logic removed here
                  } else {
                      console.error("Could not find .se-main-container in iframe either.");
                  }
@@ -603,16 +608,10 @@ async function extractNaverBlogData(url) {
         console.log("Extracting text content...");
         const textContent = await articleLocator.innerText();
 
-        // 6. Extract Blog Title (if not found yet)
+        // 6. Extract Blog Title (if not found yet) - Logic removed, will default later
         if (!blogTitle) {
-             const titleElement = articleLocator.locator('.se-title-text').first();
-             if (await titleElement.isVisible({ timeout: 1000 })) {
-                 blogTitle = await titleElement.textContent();
-                 console.log(`Blog Title (Final Attempt): ${blogTitle}`);
-             } else {
-                 console.warn("Could not find blog title.");
-                 blogTitle = "Untitled"; // Default title
-             }
+             console.warn("Title extraction logic removed. Defaulting title.");
+             blogTitle = "Untitled"; // Default title
         }
 
         await browser.close();

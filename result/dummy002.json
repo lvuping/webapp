@@ -1,0 +1,29 @@
+[
+  {
+    "title": "춘천 에어컨 설치, 여름 대비 필수!",
+    "link": "https://blog.naver.com/example_chuncheon/44444",
+    "city": "춘천",
+    "keyword": "에어컨설치",
+    "fromDate": "2024.03.01",
+    "toDate": "2024.06.30",
+    "extracted": false
+  },
+  {
+    "title": "믿을 수 있는 춘천 이삿짐센터 추천",
+    "link": "https://blog.naver.com/example_chuncheon/55555",
+    "city": "춘천",
+    "keyword": "이삿짐센터",
+    "fromDate": "2023.12.01",
+    "toDate": "2024.12.31",
+    "extracted": false
+  },
+  {
+    "title": "춘천 인테리어, 최신 트렌드 알아보기",
+    "link": "https://blog.naver.com/example_chuncheon/66666",
+    "city": "춘천",
+    "keyword": "인테리어",
+    "fromDate": "2024.02.01",
+    "toDate": "2024.05.31",
+    "extracted": true
+  }
+]

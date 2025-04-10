@@ -1,6 +1,3 @@
-# Ignore all directories
-*/
-
 # Node.js specific
 node_modules/
 npm-debug.log*

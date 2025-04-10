@@ -1,4 +1,6 @@
 import { chromium } from 'playwright';
+import fs from 'fs'; // Import fs module
+import path from 'path'; // Import path module
 
 async function scrapeNaverBlog(keyword, city, fromDate, toDate, scrollCount) {
     const encodedKeyword = encodeURIComponent(keyword + ' ' + city);
@@ -83,9 +85,37 @@ async function scrapeNaverBlog(keyword, city, fromDate, toDate, scrollCount) {
     }
 }
 
-// Example usage (you would call this function with the appropriate parameters)
-scrapeNaverBlog("보일러수리", "원주", "2020.01.01", "2021.01.01", 5).then(data => console.log(JSON.stringify(data, null, 2)));
+// Function to save data to JSON file
+function saveDataToJson(data, keyword, city) {
+    if (!data || data.length === 0) {
+        console.log("No data collected, skipping file save.");
+        return;
+    }
 
-// import { extractNaverBlogContent } from './naverBlog.js'; // Added .js extension
+    // Get current timestamp for filename
+    const now = new Date();
+    const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19); // Format: YYYY-MM-DDTHH-MM-SS
 
-// export { scrapeNaverBlog, extractNaverBlogContent };
+    // Construct filename and path
+    const filename = `${keyword}_${city}_${timestamp}.json`;
+    const resultDir = path.join(process.cwd(), 'result'); // Use process.cwd() for current working directory
+    const filePath = path.join(resultDir, filename);
+
+    try {
+        // Ensure result directory exists
+        if (!fs.existsSync(resultDir)) {
+            fs.mkdirSync(resultDir, { recursive: true });
+            console.log(`Created directory: ${resultDir}`);
+        }
+
+        // Write data to file
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+        console.log(`\n✅ Data successfully saved to: ${filePath}`);
+
+    } catch (error) {
+        console.error(`\n❌ Error saving data to file: ${error}`);
+    }
+    }
+}
+
+export { scrapeNaverBlog, saveDataToJson };
