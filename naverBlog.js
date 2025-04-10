@@ -377,7 +377,8 @@ async function createTextImgContent(htmlFilePath, folderPath) {
                     const text = $(p).text().trim();
                     // Filter out zero-width spaces or empty strings
                     if (text && text !== '\u200B') {
-                        newContent += `<p>${text}</p>\n`;
+                        // Remove <p> tags as requested
+                        newContent += `${text}\n`;
                     }
                 });
             }
@@ -390,9 +391,10 @@ async function createTextImgContent(htmlFilePath, folderPath) {
 
                     // Check for duplicates and valid src
                     if (src && !processedImgSrcs.has(src)) {
-                        const imgTag = `<img src="${src}" alt="${alt}">\n`;
+                        // const imgTag = `<img src="${src}" alt="${alt}">\n`; // Removed imgTag creation
                         const imgNameTag = `{image_${String(imgCounter).padStart(3, '0')}.png}\n`; // Reference the expected filename
-                        newContent += imgTag + imgNameTag;
+                        // newContent += imgTag + imgNameTag; // Original line
+                        newContent += imgNameTag; // Only add the placeholder name
                         processedImgSrcs.add(src);
                         imgCounter++;
                     }
@@ -774,21 +776,28 @@ async function processBlogUrl(blogUrl, title = null, region = "", keyword = "") 
             console.log("\nNo images found or extracted to download.");
         }
 
-        // Create Image Positions Text File
-        if (textContent || (orderedImageUrls && orderedImageUrls.length > 0)) {
-            console.log("\nCreating text and image position file...");
-            await createImagePositionsText(textContent, orderedImageUrls, contentStructure, folderPath);
-        }
-
         // Create Text/Image Only HTML
+        let textImgHtmlCreated = false; // Flag to track success
         if (htmlFile) {
             console.log("\nCreating text/image only HTML file...");
-            await createTextImgContent(htmlFile, folderPath);
+            const textImgPath = await createTextImgContent(htmlFile, folderPath);
+            if (textImgPath) {
+                textImgHtmlCreated = true;
+                console.log(`Deleting original HTML file: ${htmlFile}`);
+                try {
+                    await fs.unlink(htmlFile);
+                    console.log(`Successfully deleted ${htmlFile}`);
+                } catch (unlinkError) {
+                    console.error(`Failed to delete ${htmlFile}: ${unlinkError.message}`);
+                }
+            } else {
+                 console.warn(`Skipping deletion of ${htmlFile} as text/image HTML creation failed.`);
+            }
         }
 
-        // Process Images (Placeholder)
-        console.log("\nProcessing images and creating final content file (placeholder)...");
-        await processImagesPlaceholder(folderPath); // Replace with actual call if module exists
+        // Process Images (Placeholder) - Removed call
+        // console.log("\nProcessing images and creating final content file (placeholder)...");
+        // await processImagesPlaceholder(folderPath); // Replace with actual call if module exists
 
         console.log(`\nProcessing complete. Output folder: ${folderPath}`);
         return { blogId, logNo, folderPath, success: true };
@@ -847,16 +856,29 @@ async function processBlogFolder(folderPath) {
          }
 
          // Create Text/Image Only HTML (if original HTML exists)
+         let textImgHtmlCreatedInFolder = false; // Flag for folder processing
          if (await fs.access(htmlFilePath).then(() => true).catch(() => false)) {
              console.log("\nCreating text/image only HTML file...");
-             await createTextImgContent(htmlFilePath, folderPath);
+             const textImgPath = await createTextImgContent(htmlFilePath, folderPath);
+             if (textImgPath) {
+                 textImgHtmlCreatedInFolder = true;
+                 console.log(`Deleting original HTML file: ${htmlFilePath}`);
+                 try {
+                     await fs.unlink(htmlFilePath);
+                     console.log(`Successfully deleted ${htmlFilePath}`);
+                 } catch (unlinkError) {
+                     console.error(`Failed to delete ${htmlFilePath}: ${unlinkError.message}`);
+                 }
+             } else {
+                  console.warn(`Skipping deletion of ${htmlFilePath} as text/image HTML creation failed.`);
+             }
          } else {
-             console.log("Original HTML missing, skipping text/image HTML creation.");
+             console.log("Original HTML missing, skipping text/image HTML creation and deletion.");
          }
 
-         // Process Images (Placeholder)
-         console.log("\nProcessing images and creating final content file (placeholder)...");
-         await processImagesPlaceholder(folderPath); // Replace with actual call
+         // Process Images (Placeholder) - Removed call
+         // console.log("\nProcessing images and creating final content file (placeholder)...");
+         // await processImagesPlaceholder(folderPath); // Replace with actual call
 
          // Check if processed file exists
          const processedFilePath = path.join(folderPath, "content_with_images_processed.txt");

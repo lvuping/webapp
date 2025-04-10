@@ -57,6 +57,7 @@ async function scrapeNaverBlog(keyword, city, fromDate, toDate, scrollCount) {
                         keyword: keyword,
                         fromDate: fromDate,
                         toDate: toDate,
+                        extracted: false, // Add default extracted status
                     });
                     console.log(`✓ 블로그 추가 성공: ${title.substring(0, 20)}...`);
                 } else {
@@ -85,6 +86,6 @@ async function scrapeNaverBlog(keyword, city, fromDate, toDate, scrollCount) {
 // Example usage (you would call this function with the appropriate parameters)
 scrapeNaverBlog("보일러수리", "원주", "2020.01.01", "2021.01.01", 5).then(data => console.log(JSON.stringify(data, null, 2)));
 
-import { extractNaverBlogContent } from './naverBlog.js'; // Added .js extension
+// import { extractNaverBlogContent } from './naverBlog.js'; // Added .js extension
 
-export { scrapeNaverBlog, extractNaverBlogContent };
+// export { scrapeNaverBlog, extractNaverBlogContent };
