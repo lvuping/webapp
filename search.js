@@ -1,18 +1,30 @@
 import { chromium } from 'playwright';
 import fs from 'fs'; // Import fs module
 import path from 'path'; // Import path module
+import { fileURLToPath } from 'url'; // Needed to check for direct execution
 
 async function scrapeNaverBlog(keyword, city, fromDate, toDate, scrollCount) {
+    // Determine if the script is being run directly or imported
+    const currentFilePath = fileURLToPath(import.meta.url);
+    const mainScriptPath = process.argv[1];
+    const isDirectRun = currentFilePath === mainScriptPath;
+    const launchOptions = { headless: !isDirectRun }; // Headless = true if imported, false if run directly
+
     const encodedKeyword = encodeURIComponent(keyword + ' ' + city);
     const baseUrl = "https://search.naver.com/search.naver?ssc=tab.blog.all";
     const url = `${baseUrl}&query=${encodedKeyword}&sm=tab_opt&nso=so%3Ar%2Cp%3Afrom${fromDate}to${toDate}`;
 
     console.log(`1. URL 접속 시도: ${url}`);
 
-    const browser = await chromium.launch();
-    const page = await browser.newPage();
+    let browser; // Declare browser outside try
+    let page;    // Declare page outside try
 
     try {
+        // Launch with determined options
+        console.log(`Launching browser (Headless: ${launchOptions.headless})`);
+        browser = await chromium.launch(launchOptions);
+        page = await browser.newPage();    // Move page creation inside try
+
         await page.goto(url);
 
         console.log("2. 페이지 로딩 대기 시작");
@@ -79,9 +91,16 @@ async function scrapeNaverBlog(keyword, city, fromDate, toDate, scrollCount) {
     } catch (e) {
         console.log(`치명적 에러 발생: ${String(e)}`);
         console.log("데이터 수집 실패");
-        return [];
+        // Ensure browser is closed even if page creation failed but launch succeeded
+        if (browser && browser.isConnected()) await browser.close();
+        return []; // Return empty array on error
     } finally {
-        await browser.close();
+        // Ensure browser is closed if it was successfully launched and connected
+        // The catch block handles closing on error now.
+        // This finally block ensures closure on successful completion.
+        if (browser && browser.isConnected()) {
+             await browser.close();
+        }
     }
 }
 
@@ -115,7 +134,36 @@ function saveDataToJson(data, keyword, city) {
     } catch (error) {
         console.error(`\n❌ Error saving data to file: ${error}`);
     }
-    }
 }
 
 export { scrapeNaverBlog, saveDataToJson };
+
+
+// --- Direct Execution Block for Testing ---
+const currentFilePathForCheck = fileURLToPath(import.meta.url);
+const mainScriptPathForCheck = process.argv[1];
+if (currentFilePathForCheck === mainScriptPathForCheck) {
+    console.log("\n--- Running search.js directly for testing ---");
+    // Define test parameters (Use YYYYMMDD format for dates)
+    const testKeyword = "캠핑";
+    const testCity = "가평";
+    const testFromDate = "20250401";
+    const testToDate = "20250410";
+    const testScrollCount = 1;
+
+    (async () => {
+        console.log(`Running test scrape: Keyword="${testKeyword}", City="${testCity}", From=${testFromDate}, To=${testToDate}, Scrolls=${testScrollCount}`);
+        try {
+            const results = await scrapeNaverBlog(testKeyword, testCity, testFromDate, testToDate, testScrollCount);
+            console.log(`\n--- Test Run Complete ---`);
+            console.log(`Found ${results.length} items.`);
+            // Optionally save test results with a distinct name
+            if (results.length > 0) {
+                 saveDataToJson(results, testKeyword + "_DIRECT_TEST", testCity);
+            }
+        } catch (error) {
+            console.error("\n--- Test Run Failed ---");
+            console.error("Error during direct execution:", error);
+        }
+    })();
+}
