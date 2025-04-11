@@ -499,50 +499,130 @@
         function markSelectedItemsComplete() {
             if (selectedItems.size === 0) return;
 
-            console.log("--- Marking Items Complete (UI Only) ---");
-             const itemsToUpdateByFile = {};
+            console.log("--- Processing Completion ---");
 
+            const itemsToProcess = [];
+            const processedIds = new Set(); // Keep track of IDs processed
+
+            // 1. Gather data for selected items FIRST
             selectedItems.forEach(uniqueId => {
                 const itemElement = document.querySelector(`.data-item[data-id="${uniqueId}"]`);
-                 const checkbox = itemElement.querySelector('input[type="checkbox"]');
-                if (itemElement) {
-                    const filePath = itemElement.dataset.filePath;
-                    const index = parseInt(itemElement.dataset.index, 10);
+                if (!itemElement) {
+                    console.warn(`Could not find element for selected ID: ${uniqueId}`);
+                    return;
+                }
 
-                     if (!itemsToUpdateByFile[filePath]) {
-                        itemsToUpdateByFile[filePath] = [];
-                    }
-                    itemsToUpdateByFile[filePath].push(index);
+                const filePath = itemElement.dataset.filePath;
+                const index = parseInt(itemElement.dataset.index, 10);
 
+                if (allData[filePath] && allData[filePath][index]) {
+                    const itemData = allData[filePath][index];
+                    const blogUrl = itemData.link; // Use 'link' field from JSON
 
-                    // Update UI
-                    const statusSpan = itemElement.querySelector('.status');
-                    statusSpan.classList.remove('status-pending');
-                    statusSpan.classList.add('status-extracted');
-                    statusSpan.textContent = 'Completed';
-
-                    // Update in-memory data
-                    if (allData[filePath] && allData[filePath][index]) {
-                        allData[filePath][index].extracted = true;
-                         console.log(`Simulating update for: ${JSON.stringify(allData[filePath][index])}`);
+                    if (!blogUrl) {
+                        console.warn(`Skipping item ${uniqueId}: Blog link (URL) not found in data.`);
+                        alert(`데이터 오류: ${uniqueId} 항목에 link(URL)가 없습니다.`);
+                        return; // Skip if no link
                     }
 
-                    // Uncheck and deselect
-                    itemElement.classList.remove('selected');
-                    if(checkbox) checkbox.checked = false;
+                    itemsToProcess.push({
+                        uniqueId: uniqueId,
+                        blogUrl: blogUrl,
+                        title: itemData.title,
+                        region: itemData.city, // Assuming 'city' maps to region
+                        keyword: itemData.keyword,
+                        filePath: filePath,
+                        index: index
+                    });
+
+                } else {
+                     console.warn(`Could not find data for selected ID: ${uniqueId} (Path: ${filePath}, Index: ${index})`);
+                     alert(`데이터 오류: ${uniqueId} 항목의 정보를 찾을 수 없습니다.`);
                 }
             });
 
-             // Log intended changes
-            for (const path in itemsToUpdateByFile) {
-                console.log(`File: ${path}, Indices to mark complete: ${itemsToUpdateByFile[path].join(', ')}`);
+            if (itemsToProcess.length === 0) {
+                 console.log("No valid items to process.");
+                 // Clear selection even if nothing was processed
+                 selectedItems.clear();
+                 updateActionButtons();
+                 return;
             }
-            console.log("--------------------------------------");
 
-            selectedItems.clear();
-            updateActionButtons();
-            // Note: Actual file writing is not performed here.
-             alert('Selected items marked as complete in the view. File updates require backend implementation.');
+            // 2. Send requests to backend
+            console.log(`Sending ${itemsToProcess.length} download requests...`);
+            const downloadPromises = itemsToProcess.map(item => {
+                 console.log(`Requesting download for: ${item.blogUrl} (Title: ${item.title}, Region: ${item.region}, Keyword: ${item.keyword})`);
+                 return fetch('/api/download-blog', {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/json',
+                     },
+                     body: JSON.stringify({
+                         blogUrl: item.blogUrl,
+                         title: item.title,
+                         region: item.region,
+                         keyword: item.keyword
+                     }),
+                 })
+                 .then(response => response.json())
+                 .then(data => {
+                     if (data.success) {
+                         console.log(`Download successful for ${item.blogUrl}: ${data.folderPath}`);
+                         processedIds.add(item.uniqueId); // Mark as successfully processed
+                     } else {
+                         console.error(`Download failed for ${item.blogUrl}: ${data.message || 'Unknown error'}`);
+                         alert(`블로그 다운로드 실패: ${item.blogUrl}\n${data.message || ''}`);
+                     }
+                     return data.success; // Return success status
+                 })
+                 .catch(error => {
+                     console.error(`Error sending download request for ${item.blogUrl}:`, error);
+                     alert(`블로그 다운로드 요청 중 오류 발생: ${item.blogUrl}`);
+                     return false; // Indicate failure
+                 });
+            });
+
+            // 3. Wait for all requests and update UI for successfully processed items
+            Promise.all(downloadPromises).then((results) => {
+                console.log("All download requests finished.");
+                let successCount = 0;
+
+                processedIds.forEach(uniqueId => {
+                     const itemElement = document.querySelector(`.data-item[data-id="${uniqueId}"]`);
+                     const checkbox = itemElement?.querySelector('input[type="checkbox"]');
+                     if (itemElement) {
+                         // Update UI
+                         const statusSpan = itemElement.querySelector('.status');
+                         if (statusSpan) {
+                             statusSpan.classList.remove('status-pending');
+                             statusSpan.classList.add('status-extracted');
+                             statusSpan.textContent = '완료'; // Changed from 'Completed'
+                         }
+
+                         // Update in-memory data (optional but good practice)
+                         const filePath = itemElement.dataset.filePath;
+                         const index = parseInt(itemElement.dataset.index, 10);
+                         if (allData[filePath] && allData[filePath][index]) {
+                             allData[filePath][index].extracted = true;
+                         }
+
+                         // Uncheck and deselect visually
+                         itemElement.classList.remove('selected');
+                         if (checkbox) checkbox.checked = false;
+                         successCount++;
+                     }
+                });
+
+                // 4. Clear selection and update buttons
+                selectedItems.clear();
+                updateActionButtons();
+
+                alert(`${successCount} / ${itemsToProcess.length}개 항목의 다운로드 요청이 성공적으로 처리되었습니다. 실패한 항목은 콘솔을 확인하세요.`);
+
+                // Optionally reload data to reflect changes persisted on the backend (if any)
+                // loadAllData();
+            });
         }
 
         async function loadAllData() {

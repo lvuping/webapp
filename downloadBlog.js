@@ -39,7 +39,6 @@ function convertToHighResolution(imgUrl) {
                 return `${baseUrl}?${params.toString()}`;
             }
             // If no query params, return base URL (often original) or add type=w966 as fallback
-            // Let's try adding type=w966 by default if no params exist, might be safer
             return `${baseUrl}?type=w966`;
         }
 
@@ -424,7 +423,8 @@ async function createTextImgContent(htmlFilePath, folderPath) {
 
     } catch (error) {
         console.error(`Error creating text/image HTML: ${error.message}`);
-        import('traceback').then(tb => tb.print_exc()); // Node doesn't have traceback directly
+        // Node doesn't have traceback directly, just log the error
+        console.error(error);
         return null;
     }
 }
@@ -891,7 +891,8 @@ async function processBlogFolder(folderPath) {
 
      } catch (error) {
          console.error(`Error processing folder ${folderPath}: ${error.message}`);
-         import('traceback').then(tb => tb.print_exc());
+         // Node doesn't have traceback directly, just log the error
+         console.error(error);
          return false;
      }
 }

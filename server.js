@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs/promises'; // Import the promises version of fs
 import { fileURLToPath } from 'url';
 import { scrapeNaverBlog, saveDataToJson } from './search.js'; // Import functions from search.js
+import { processBlogUrl } from './downloadBlog.js'; // Import the blog processing function from the new file
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -77,6 +78,34 @@ app.get('/api/results', async (req, res) => {
     } else {
       res.status(500).json({ success: false, message: 'Server error reading result files.' });
     }
+  }
+});
+
+// API endpoint to trigger blog download/processing
+app.post('/api/download-blog', async (req, res) => {
+  const { blogUrl, title, region, keyword } = req.body;
+
+  if (!blogUrl) {
+    return res.status(400).json({ success: false, message: 'Missing required parameter: blogUrl' });
+  }
+
+  console.log(`Received download request for: ${blogUrl}`);
+  console.log(`  Title: ${title || 'N/A'}, Region: ${region || 'N/A'}, Keyword: ${keyword || 'N/A'}`);
+
+  try {
+    // Call the processing function from naverBlog.js
+    const result = await processBlogUrl(blogUrl, title, region, keyword);
+
+    if (result.success) {
+      console.log(`Successfully processed blog: ${blogUrl}. Folder: ${result.folderPath}`);
+      res.json({ success: true, message: 'Blog processed successfully.', folderPath: result.folderPath });
+    } else {
+      console.error(`Failed to process blog: ${blogUrl}`);
+      res.status(500).json({ success: false, message: 'Failed to process blog.', folderPath: result.folderPath });
+    }
+  } catch (error) {
+    console.error(`Error processing blog URL ${blogUrl}:`, error);
+    res.status(500).json({ success: false, message: `Server error during blog processing: ${error.message}` });
   }
 });
 
