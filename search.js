@@ -104,21 +104,18 @@ async function scrapeNaverBlog(keyword, city, fromDate, toDate, scrollCount) {
     }
 }
 
-// Function to save data to JSON file
-function saveDataToJson(data, keyword, city) {
-    if (!data || data.length === 0) {
-        console.log("No data collected, skipping file save.");
+// Function to save data to a single JSON file, using link as key
+function saveDataToJson(newData) {
+    if (!newData || newData.length === 0) {
+        console.log("No new data collected, skipping file save.");
         return;
     }
 
-    // Get current timestamp for filename
-    const now = new Date();
-    const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19); // Format: YYYY-MM-DDTHH-MM-SS
+    // Define the single file path
+    const resultDir = path.join(process.cwd(), 'result');
+    const filePath = path.join(resultDir, 'search_results.json');
 
-    // Construct filename and path
-    const filename = `${keyword}_${city}_${timestamp}.json`;
-    const resultDir = path.join(process.cwd(), 'result'); // Use process.cwd() for current working directory
-    const filePath = path.join(resultDir, filename);
+    let existingData = {};
 
     try {
         // Ensure result directory exists
@@ -127,12 +124,37 @@ function saveDataToJson(data, keyword, city) {
             console.log(`Created directory: ${resultDir}`);
         }
 
-        // Write data to file
-        fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
-        console.log(`\n✅ Data successfully saved to: ${filePath}`);
+        // Read existing data if file exists
+        if (fs.existsSync(filePath)) {
+            try {
+                const fileContent = fs.readFileSync(filePath, 'utf8');
+                existingData = JSON.parse(fileContent);
+                // Basic validation: check if it's an object
+                if (typeof existingData !== 'object' || existingData === null || Array.isArray(existingData)) {
+                    console.warn(`Warning: Existing file ${filePath} does not contain a valid JSON object. Starting fresh.`);
+                    existingData = {};
+                }
+            } catch (parseError) {
+                console.error(`Error parsing existing JSON file ${filePath}: ${parseError}. Starting fresh.`);
+                existingData = {}; // Reset if parsing fails
+            }
+        }
+
+        // Add or update new data using link as the key
+        newData.forEach(item => {
+            if (item && item.link) { // Ensure item and link exist
+                existingData[item.link] = item; // Add or overwrite entry
+            } else {
+                console.warn("Skipping item due to missing link:", item);
+            }
+        });
+
+        // Write the updated data back to the file
+        fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2), 'utf8');
+        console.log(`\n✅ Data successfully saved/updated in: ${filePath}`);
 
     } catch (error) {
-        console.error(`\n❌ Error saving data to file: ${error}`);
+        console.error(`\n❌ Error saving data to file ${filePath}: ${error}`);
     }
 }
 
@@ -157,9 +179,9 @@ if (currentFilePathForCheck === mainScriptPathForCheck) {
             const results = await scrapeNaverBlog(testKeyword, testCity, testFromDate, testToDate, testScrollCount);
             console.log(`\n--- Test Run Complete ---`);
             console.log(`Found ${results.length} items.`);
-            // Optionally save test results with a distinct name
+            // Save test results to the consolidated file
             if (results.length > 0) {
-                 saveDataToJson(results, testKeyword + "_DIRECT_TEST", testCity);
+                 saveDataToJson(results); // No need for keyword/city in filename anymore
             }
         } catch (error) {
             console.error("\n--- Test Run Failed ---");

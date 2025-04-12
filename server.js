@@ -63,23 +63,125 @@ app.post('/api/run-naver-search', async (req, res) => {
   }
 });
 
-// API endpoint to list JSON files in the result directory
-app.get('/api/results', async (req, res) => {
-  const resultsDir = path.join(__dirname, 'result');
-  try {
-    const files = await fs.readdir(resultsDir);
-    const jsonFiles = files.filter(file => path.extname(file).toLowerCase() === '.json');
-    res.json({ success: true, files: jsonFiles });
-  } catch (error) {
-    console.error('Error reading result directory:', error);
-    // Check if the error is because the directory doesn't exist
-    if (error.code === 'ENOENT') {
-      res.status(404).json({ success: false, message: 'Result directory not found.' });
-    } else {
-      res.status(500).json({ success: false, message: 'Server error reading result files.' });
+// --- Utility function to read/write the results JSON ---
+const resultsFilePath = path.join(__dirname, 'result', 'search_results.json');
+
+async function readResultsFile() {
+    try {
+        await fs.access(resultsFilePath); // Check if file exists
+        const data = await fs.readFile(resultsFilePath, 'utf8');
+        return JSON.parse(data);
+    } catch (error) {
+        if (error.code === 'ENOENT') {
+            console.log('results file not found, returning empty object.');
+            return {}; // File doesn't exist, return empty object
+        }
+        // Handle JSON parsing errors or other read errors
+        console.error('Error reading results file:', error);
+        throw new Error('Could not read results file.'); // Re-throw specific error
     }
+}
+
+async function writeResultsFile(data) {
+    try {
+        // Ensure result directory exists
+        await fs.mkdir(path.dirname(resultsFilePath), { recursive: true });
+        await fs.writeFile(resultsFilePath, JSON.stringify(data, null, 2), 'utf8');
+    } catch (error) {
+        console.error('Error writing results file:', error);
+        throw new Error('Could not write results file.');
+    }
+}
+// --- End Utility Functions ---
+
+
+// API endpoint to get all results from the single JSON file
+app.get('/api/results', async (req, res) => {
+  try {
+    const data = await readResultsFile();
+     // Basic validation: check if it's an object
+     if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+        console.warn(`Warning: results file does not contain a valid JSON object. Returning empty.`);
+        res.json({ success: true, data: {} }); // Return empty object if invalid format
+     } else {
+        res.json({ success: true, data: data });
+     }
+  } catch (error) {
+    console.error('Error serving results:', error);
+    res.status(500).json({ success: false, message: error.message || 'Server error reading results file.' });
   }
 });
+
+// API endpoint to DELETE selected results
+app.delete('/api/results', async (req, res) => {
+    const { linksToDelete } = req.body; // Expect an array of links (keys)
+
+    if (!Array.isArray(linksToDelete) || linksToDelete.length === 0) {
+        return res.status(400).json({ success: false, message: 'Invalid request: "linksToDelete" must be a non-empty array.' });
+    }
+
+    console.log(`Received request to delete ${linksToDelete.length} items.`);
+
+    try {
+        let data = await readResultsFile();
+        let deleteCount = 0;
+        linksToDelete.forEach(link => {
+            if (data.hasOwnProperty(link)) {
+                delete data[link];
+                deleteCount++;
+            } else {
+                 console.warn(`Link not found for deletion: ${link}`);
+            }
+        });
+
+        await writeResultsFile(data);
+        console.log(`Successfully deleted ${deleteCount} items.`);
+        res.json({ success: true, message: `${deleteCount} items deleted successfully.` });
+
+    } catch (error) {
+        console.error('Error deleting results:', error);
+        res.status(500).json({ success: false, message: error.message || 'Server error deleting results.' });
+    }
+});
+
+// API endpoint to update the 'extracted' status of items
+app.patch('/api/results/status', async (req, res) => {
+    const { linksToUpdate } = req.body; // Expect an array of links (keys)
+
+    if (!Array.isArray(linksToUpdate) || linksToUpdate.length === 0) {
+        return res.status(400).json({ success: false, message: 'Invalid request: "linksToUpdate" must be a non-empty array.' });
+    }
+
+    console.log(`Received request to update status for ${linksToUpdate.length} items.`);
+
+    try {
+        let data = await readResultsFile();
+        let updateCount = 0;
+        linksToUpdate.forEach(link => {
+            if (data.hasOwnProperty(link)) {
+                if (data[link].extracted !== true) { // Only update if not already true
+                    data[link].extracted = true;
+                    updateCount++;
+                }
+            } else {
+                console.warn(`Link not found for status update: ${link}`);
+            }
+        });
+
+        if (updateCount > 0) {
+            await writeResultsFile(data);
+            console.log(`Successfully updated status for ${updateCount} items.`);
+        } else {
+             console.log(`No status updates needed for the provided links.`);
+        }
+        res.json({ success: true, message: `${updateCount} items marked as extracted.` });
+
+    } catch (error) {
+        console.error('Error updating status:', error);
+        res.status(500).json({ success: false, message: error.message || 'Server error updating status.' });
+    }
+});
+
 
 // API endpoint to trigger blog download/processing
 app.post('/api/download-blog', async (req, res) => {

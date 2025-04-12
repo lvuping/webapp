@@ -17,84 +17,80 @@
             padding: 10px 12px; /* Reduced padding */
             border-bottom: 1px solid #e5e7eb;
             transition: background-color 0.2s;
+            /* Removed file header specific styles */
         }
         .data-item:hover {
-            background-color: #f3f4f6;
+            background-color: #f3f4f6; /* Keep hover effect */
         }
         .data-item.selected {
-            background-color: #dbeafe;
+            background-color: #dbeafe; /* Keep selected style */
         }
         .data-item input[type="checkbox"] {
-            margin-right: 0; /* Remove margin, use grid gap */
-            grid-column: 1 / 2; /* Place in first column */
+            margin-right: 0; /* Keep checkbox style */
+            grid-column: 1 / 2; /* Keep checkbox position */
         }
-        /* Removed .data-item > div as grid handles layout now */
         .data-item .title {
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            grid-column: 2 / 3; /* Place in second column */
+            font-weight: 600; /* Keep title style */
+            white-space: nowrap; /* Keep title style */
+            overflow: hidden; /* Keep title style */
+            text-overflow: ellipsis; /* Keep title style */
+            grid-column: 2 / 3; /* Keep title position */
+        }
+        /* Style for the link within the title */
+        .data-item .title a {
+            color: inherit; /* Inherit color from parent */
+            text-decoration: none; /* Remove underline */
+        }
+        .data-item .title a:hover {
+            text-decoration: underline; /* Underline on hover */
+            color: #2563eb; /* Optional: change color on hover */
         }
         .data-item .details {
-            font-size: 0.85em; /* Slightly smaller */
-            color: #4b5563;
-            white-space: nowrap;
-            grid-column: 3 / 4; /* Place in third column */
-            display: flex; /* Use flex for tags inside */
-            gap: 6px; /* Gap between tags */
+            font-size: 0.85em; /* Keep details style */
+            color: #4b5563; /* Keep details style */
+            white-space: nowrap; /* Keep details style */
+            grid-column: 3 / 4; /* Keep details position */
+            display: flex; /* Keep details style */
+            gap: 6px; /* Keep details style */
         }
-        /* Tag styling for details */
+        /* Keep tag styling */
         .tag {
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.9em;
+            padding: 2px 6px; /* Keep tag style */
+            border-radius: 4px; /* Keep tag style */
+            font-size: 0.9em; /* Keep tag style */
         }
-        .tag-region { background-color: #e0f2fe; color: #0c4a6e; } /* Light Blue */
-        .tag-keyword { background-color: #dcfce7; color: #166534; } /* Light Green */
-        .tag-date { background-color: #f3f4f6; color: #4b5563; } /* Light Gray */
+        .tag-region { background-color: #e0f2fe; color: #0c4a6e; } /* Keep tag style */
+        .tag-keyword { background-color: #dcfce7; color: #166534; } /* Keep tag style */
+        .tag-date { background-color: #f3f4f6; color: #4b5563; } /* Keep tag style */
 
         .data-item .status {
-            font-size: 0.8em;
-            padding: 3px 8px;
-            border-radius: 6px;
-            white-space: nowrap;
-            font-weight: 500;
-            grid-column: 4 / 5; /* Place in fourth column */
-            justify-self: end; /* Align status to the right */
+            font-size: 0.8em; /* Keep status style */
+            padding: 3px 8px; /* Keep status style */
+            border-radius: 6px; /* Keep status style */
+            white-space: nowrap; /* Keep status style */
+            font-weight: 500; /* Keep status style */
+            grid-column: 4 / 5; /* Keep status position */
+            justify-self: end; /* Keep status alignment */
         }
         .status-extracted {
-            background-color: #dcfce7;
-            color: #166534;
+            background-color: #dcfce7; /* Keep status style */
+            color: #166534; /* Keep status style */
         }
         .status-pending {
-            background-color: #fef9c3;
-            color: #854d0e;
+            background-color: #fef9c3; /* Keep status style */
+            color: #854d0e; /* Keep status style */
         }
-        .file-header {
-            background-color: #e5e7eb;
-            padding: 8px 12px; /* Reduced padding */
-            font-weight: 600;
-            margin-top: 16px; /* Reduced margin */
-            border-bottom: 2px solid #d1d5db;
-            color: #374151;
-            font-size: 1.05em; /* Slightly smaller */
-            cursor: pointer; /* Add pointer cursor */
-            transition: background-color 0.2s;
-        }
-        .file-header:hover {
-            background-color: #d1d5db; /* Darken on hover */
-        }
+        /* Removed .file-header styles */
         #action-buttons {
-            position: sticky;
-            bottom: 0;
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 12px 24px; /* Increased padding */
-            border-top: 1px solid #d1d5db; /* Tailwind gray-300 */
-            box-shadow: 0 -2px 6px rgba(0,0,0,0.08); /* Softer shadow */
-            display: flex;
-            gap: 12px; /* Increased gap */
-            justify-content: flex-end;
+            position: sticky; /* Keep action buttons style */
+            bottom: 0; /* Keep action buttons style */
+            background-color: rgba(255, 255, 255, 0.9); /* Keep action buttons style */
+            padding: 12px 24px; /* Keep action buttons style */
+            border-top: 1px solid #d1d5db; /* Keep action buttons style */
+            box-shadow: 0 -2px 6px rgba(0,0,0,0.08); /* Keep action buttons style */
+            display: flex; /* Keep action buttons style */
+            gap: 12px; /* Keep action buttons style */
+            justify-content: flex-end; /* Keep action buttons style */
         }
     </style>
     <!-- Add Google Font Inter for a cleaner look -->
@@ -119,6 +115,10 @@
                  <span class="text-sm font-medium text-gray-500 w-full mb-1">지역:</span>
                  <!-- Region buttons will be loaded here -->
              </div>
+             <div class="flex flex-wrap gap-2 mt-3" id="status-filters">
+                 <span class="text-sm font-medium text-gray-500 w-full mb-1">상태:</span>
+                 <!-- Status buttons will be loaded here -->
+             </div>
              <button id="show-all-btn" class="mt-3 px-3 py-1 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300 transition">전체 보기</button>
         </div>
         <!-- End Filter Section -->
@@ -131,7 +131,7 @@
         <div id="action-buttons" class="hidden mt-4">
              <span id="selected-count" class="mr-4 self-center text-gray-600">0개 선택됨</span>
             <button id="complete-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
-                완료 처리
+                다운로드
             </button>
             <button id="delete-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">
                 선택 삭제
@@ -147,42 +147,32 @@
         const completeButton = document.getElementById('complete-btn');
         const selectedCountSpan = document.getElementById('selected-count');
 
-        // Removed hardcoded filePaths array
-
-        let allData = {}; // Store data keyed by file path
-        let selectedItems = new Set(); // Store unique IDs of selected items
+        let allBlogData = {}; // Store data keyed by blog link (from search_results.json)
+        let selectedItems = new Set(); // Store unique IDs (blog links) of selected items
         let lastCheckedCheckbox = null; // To track the last checkbox clicked for shift-select
         let uniqueKeywords = new Set();
         let uniqueRegions = new Set();
-        let currentFilter = { keyword: null, region: null }; // To store active filters
+        let currentFilter = { keyword: null, region: null, status: null }; // Added status filter
 
         const filterContainer = document.getElementById('filter-container');
         const keywordFiltersContainer = document.getElementById('keyword-filters');
         const regionFiltersContainer = document.getElementById('region-filters');
+        const statusFiltersContainer = document.getElementById('status-filters'); // Added status container
         const showAllButton = document.getElementById('show-all-btn');
 
-
-        async function fetchData(filePath) {
-            try {
-                const response = await fetch(filePath);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status} for ${filePath}`);
-                }
-                return await response.json();
-            } catch (error) {
-                console.error(`Error fetching ${filePath}:`, error);
-                return []; // Return empty array on error
-            }
-        }
+        // Removed fetchData function as we fetch only one file now
 
         function renderFilters() {
             // Clear existing buttons except labels
             keywordFiltersContainer.innerHTML = '<span class="text-sm font-medium text-gray-500 w-full mb-1">키워드:</span>';
             regionFiltersContainer.innerHTML = '<span class="text-sm font-medium text-gray-500 w-full mb-1">지역:</span>';
+            statusFiltersContainer.innerHTML = '<span class="text-sm font-medium text-gray-500 w-full mb-1">상태:</span>'; // Clear status filters
 
-            if (uniqueKeywords.size === 0 && uniqueRegions.size === 0) {
-                filterContainer.classList.add('hidden'); // Hide filters if none found
-                return;
+            // Hide the entire filter section only if there are no keywords AND no regions
+            // Status filters ("대기", "완료") should always be visible if there's data.
+            if (uniqueKeywords.size === 0 && uniqueRegions.size === 0 && Object.keys(allBlogData).length === 0) {
+                 filterContainer.classList.add('hidden');
+                 return;
             } else {
                  filterContainer.classList.remove('hidden');
             }
@@ -190,6 +180,7 @@
             // Sort for consistent order
             const sortedKeywords = Array.from(uniqueKeywords).sort();
             const sortedRegions = Array.from(uniqueRegions).sort();
+            const statuses = ['pending', 'completed']; // Define status values
 
             sortedKeywords.forEach(keyword => {
                 const button = document.createElement('button');
@@ -208,6 +199,22 @@
                 button.addEventListener('click', () => applyFilter('region', region));
                 regionFiltersContainer.appendChild(button);
             });
+
+            // Add Status Filters
+            statuses.forEach(status => {
+                const button = document.createElement('button');
+                const statusText = status === 'pending' ? '대기' : '완료';
+                button.textContent = statusText;
+                button.dataset.status = status; // Store 'pending' or 'completed'
+                // Use different colors for status filters (e.g., yellow/purple)
+                const isActive = currentFilter.status === status;
+                const baseClasses = 'filter-btn status-btn px-3 py-1 rounded text-sm transition';
+                const activeClasses = status === 'pending' ? 'bg-yellow-400 text-yellow-900 font-semibold' : 'bg-purple-500 text-white font-semibold';
+                const inactiveClasses = status === 'pending' ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200' : 'bg-purple-100 text-purple-700 hover:bg-purple-200';
+                button.className = `${baseClasses} ${isActive ? activeClasses : inactiveClasses}`;
+                button.addEventListener('click', () => applyFilter('status', status));
+                statusFiltersContainer.appendChild(button);
+            });
         }
 
         function applyFilter(type, value) {
@@ -222,139 +229,117 @@
         }
 
         function clearFilters() {
-            currentFilter = { keyword: null, region: null };
+            currentFilter = { keyword: null, region: null, status: null }; // Reset status filter too
             renderData();
             renderFilters();
         }
 
+        // Helper function to format YYYYMMDD to YYYY.MM.DD
+        function formatDateString(dateStr) {
+            if (!dateStr || dateStr.length !== 8) {
+                return dateStr || ''; // Return original or empty string if invalid
+            }
+            const year = dateStr.substring(0, 4);
+            const month = dateStr.substring(4, 6);
+            const day = dateStr.substring(6, 8);
+            return `${year}.${month}.${day}`;
+        }
 
         function renderData() {
             dataContainer.innerHTML = ''; // Clear previous content
             loadingIndicator.classList.add('hidden'); // Hide loading initially if called again
 
-            let filteredItemCount = 0;
-            const filePathsToRender = Object.keys(allData);
+            const allItems = Object.values(allBlogData); // Get all items as an array
 
-            if (filePathsToRender.length === 0) {
-                dataContainer.innerHTML = '<div class="p-8 text-center text-gray-500">결과 폴더에 표시할 JSON 파일이 없습니다.</div>';
+            if (allItems.length === 0) {
+                dataContainer.innerHTML = '<div class="p-8 text-center text-gray-500">표시할 데이터가 없습니다.</div>';
                 return;
             }
 
-            filePathsToRender.forEach(filePath => {
-                const originalData = allData[filePath];
-                if (!originalData || originalData.length === 0) return;
-
-                // Filter data based on currentFilter
-                const filteredData = originalData.filter(item => {
-                    const keywordMatch = !currentFilter.keyword || (item.keyword && item.keyword.toLowerCase() === currentFilter.keyword.toLowerCase());
-                    // Ensure city comparison is also case-insensitive
-                    const regionMatch = !currentFilter.region || (item.city && item.city.toLowerCase() === currentFilter.region.toLowerCase());
-                    return keywordMatch && regionMatch;
-                });
-
-                if (filteredData.length === 0) return; // Skip rendering this file if no items match the filter
-
-                filteredItemCount += filteredData.length;
-
-                // --- Create File Header ---
-                 // Show filtered count in header if filters are active
-                const isFiltered = currentFilter.keyword || currentFilter.region;
-                const countText = isFiltered ? `${filteredData.length} / ${originalData.length}개 항목` : `${originalData.length}개 항목`;
-
-                const fileHeader = document.createElement('div');
-                fileHeader.className = 'file-header';
-                fileHeader.dataset.filePath = filePath; // Add data attribute for identification
-
-                // Extract keyword and city from the first item of the *original* data for the header
-                let headerText = filePath; // Default to file path
-                if (originalData && originalData.length > 0) {
-                    const firstItem = originalData[0];
-                    if (firstItem && firstItem.keyword && firstItem.city) {
-                        headerText = `${firstItem.keyword} - ${firstItem.city}`;
-                    } else if (firstItem && firstItem.keyword) {
-                        headerText = firstItem.keyword; // Fallback if city is missing
-                    } else if (firstItem && firstItem.city) {
-                        headerText = firstItem.city; // Fallback if keyword is missing
-                    }
-                }
-                 // Add count of items in the file
-                headerText += ` (${countText})`;
-
-                fileHeader.textContent = headerText;
-                fileHeader.addEventListener('click', handleHeaderClick); // Add click listener
-                dataContainer.appendChild(fileHeader);
-                // --- End File Header Creation ---
-
-                // Add filtered data items
-                filteredData.forEach((item) => {
-                     // Find the original index for consistent ID generation
-                    const originalIndex = originalData.findIndex(originalItem => originalItem === item); // Find based on object reference
-                    if (originalIndex === -1) {
-                        console.warn("Could not find original index for item:", item);
-                        return; // Skip if we can't find the original index (should not happen ideally)
-                    }
-                    const uniqueId = `${filePath}-${originalIndex}`; // Use original index for ID
-
-                    const itemElement = document.createElement('div');
-                    itemElement.className = 'data-item';
-                    itemElement.dataset.id = uniqueId;
-                    itemElement.dataset.filePath = filePath;
-                    itemElement.dataset.index = originalIndex; // Store original index
-
-                    const checkbox = document.createElement('input');
-                    checkbox.type = 'checkbox';
-                    checkbox.checked = selectedItems.has(uniqueId);
-                    if (checkbox.checked) {
-                        itemElement.classList.add('selected');
-                    }
-                    checkbox.dataset.id = uniqueId;
-                    checkbox.dataset.filePath = filePath; // Add file path to checkbox for grouping
-                    checkbox.addEventListener('change', handleSelectionChange);
-
-                    // No contentDiv needed with grid
-
-                    const titleSpan = document.createElement('span');
-                    titleSpan.className = 'title';
-                    titleSpan.textContent = item.title;
-                    titleSpan.title = item.title;
-
-                    // Create details with tags
-                    const detailsSpan = document.createElement('span');
-                    detailsSpan.className = 'details';
-                    detailsSpan.innerHTML = `
-                        <span class="tag tag-region">${item.city || 'N/A'}</span>
-                        <span class="tag tag-keyword">${item.keyword || 'N/A'}</span>
-                        <span class="tag tag-date">${item.fromDate || ''} ~ ${item.toDate || ''}</span>
-                    `;
-
-                    const statusSpan = document.createElement('span');
-                    statusSpan.className = 'status';
-                    if (item.extracted) {
-                        statusSpan.classList.add('status-extracted');
-                        statusSpan.textContent = '완료';
-                    } else {
-                        statusSpan.classList.add('status-pending');
-                        statusSpan.textContent = '대기';
-                    }
-
-                    // Append elements directly to the grid item
-                    itemElement.appendChild(checkbox);
-                    itemElement.appendChild(titleSpan);
-                    itemElement.appendChild(detailsSpan);
-                    itemElement.appendChild(statusSpan);
-                    dataContainer.appendChild(itemElement);
-                });
+            // Filter data based on currentFilter
+            const filteredData = allItems.filter(item => {
+                const keywordMatch = !currentFilter.keyword || (item.keyword && item.keyword.toLowerCase() === currentFilter.keyword.toLowerCase());
+                const regionMatch = !currentFilter.region || (item.city && item.city.toLowerCase() === currentFilter.region.toLowerCase());
+                // Status filter logic
+                const statusMatch = !currentFilter.status ||
+                                    (currentFilter.status === 'pending' && !item.extracted) ||
+                                    (currentFilter.status === 'completed' && item.extracted);
+                return keywordMatch && regionMatch && statusMatch; // Add statusMatch
             });
 
-            // Add message if no items match the current filter but there is data overall
-            if (filteredItemCount === 0 && filePathsToRender.length > 0 && Object.keys(allData).length > 0) {
+            if (filteredData.length === 0) {
                  dataContainer.innerHTML = '<div class="p-8 text-center text-gray-500">선택한 필터와 일치하는 항목이 없습니다.</div>';
+                 return; // Skip rendering if no items match the filter
             }
+
+            // Add filtered data items
+            filteredData.forEach((item) => {
+                const uniqueId = item.link; // Use link as the unique ID
+
+                if (!uniqueId) {
+                    console.warn("Skipping item due to missing link:", item);
+                    return; // Need a link to identify the item
+                }
+
+                const itemElement = document.createElement('div');
+                itemElement.className = 'data-item';
+                itemElement.dataset.id = uniqueId; // Store link as ID
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = selectedItems.has(uniqueId);
+                if (checkbox.checked) {
+                    itemElement.classList.add('selected');
+                }
+                checkbox.dataset.id = uniqueId; // Store link as ID on checkbox too
+                checkbox.addEventListener('change', handleSelectionChange);
+
+                // --- Title as Link ---
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'title';
+                const titleLink = document.createElement('a');
+                titleLink.href = item.link;
+                titleLink.target = '_blank'; // Open in new tab
+                titleLink.rel = 'noopener noreferrer'; // Security measure
+                titleLink.textContent = item.title || '제목 없음';
+                titleLink.title = item.title || '제목 없음';
+                titleSpan.appendChild(titleLink); // Add link to the span
+                // --- End Title as Link ---
+
+                // --- Create details with tags and formatted date ---
+                const detailsSpan = document.createElement('span');
+                detailsSpan.className = 'details';
+                const formattedFromDate = formatDateString(item.fromDate);
+                const formattedToDate = formatDateString(item.toDate);
+                detailsSpan.innerHTML = `
+                    <span class="tag tag-region">${item.city || 'N/A'}</span>
+                    <span class="tag tag-keyword">${item.keyword || 'N/A'}</span>
+                    <span class="tag tag-date">${formattedFromDate} ~ ${formattedToDate}</span>
+                `;
+                // --- End Details ---
+
+                const statusSpan = document.createElement('span');
+                statusSpan.className = 'status';
+                if (item.extracted) {
+                    statusSpan.classList.add('status-extracted');
+                    statusSpan.textContent = '완료';
+                } else {
+                    statusSpan.classList.add('status-pending');
+                    statusSpan.textContent = '대기';
+                }
+
+                // Append elements directly to the grid item
+                itemElement.appendChild(checkbox);
+                itemElement.appendChild(titleSpan); // Append the span containing the link
+                itemElement.appendChild(detailsSpan);
+                itemElement.appendChild(statusSpan);
+                dataContainer.appendChild(itemElement);
+            });
         }
 
         function handleSelectionChange(event) {
             const currentCheckbox = event.target;
-            const uniqueId = currentCheckbox.dataset.id;
+            const uniqueId = currentCheckbox.dataset.id; // This is the link
             const currentItemElement = document.querySelector(`.data-item[data-id="${uniqueId}"]`);
 
             // Get all currently visible checkboxes in the data container
@@ -372,7 +357,7 @@
                 for (let i = lowerIndex; i <= upperIndex; i++) {
                     const checkboxInRange = allCheckboxes[i];
                     const itemElementInRange = checkboxInRange.closest('.data-item'); // Find parent item
-                    const idInRange = checkboxInRange.dataset.id;
+                    const idInRange = checkboxInRange.dataset.id; // Link
 
                     if (checkboxInRange && itemElementInRange) {
                         // Set checked state to match the currently clicked checkbox
@@ -404,44 +389,7 @@
             updateActionButtons();
         }
 
-        // --- New Function for Header Click ---
-        function handleHeaderClick(event) {
-            const headerElement = event.currentTarget;
-            const filePath = headerElement.dataset.filePath;
-
-            // Find all checkboxes belonging to this file group that are currently visible
-            const checkboxesInGroup = Array.from(dataContainer.querySelectorAll(`.data-item input[type="checkbox"][data-file-path="${filePath}"]`));
-
-            if (checkboxesInGroup.length === 0) return; // No checkboxes to toggle
-
-            // Determine if we should check or uncheck all
-            // Check if *all* checkboxes in the group are already checked
-            const allChecked = checkboxesInGroup.every(cb => cb.checked);
-            const shouldCheck = !allChecked; // If all are checked, we uncheck; otherwise, we check
-
-            checkboxesInGroup.forEach(checkbox => {
-                const uniqueId = checkbox.dataset.id;
-                const itemElement = checkbox.closest('.data-item');
-
-                if (checkbox.checked !== shouldCheck) { // Only change if needed
-                    checkbox.checked = shouldCheck;
-
-                    // Update selectedItems set and visual style
-                    if (shouldCheck) {
-                        selectedItems.add(uniqueId);
-                        itemElement.classList.add('selected');
-                    } else {
-                        selectedItems.delete(uniqueId);
-                        itemElement.classList.remove('selected');
-                    }
-                }
-            });
-
-            // Reset lastCheckedCheckbox after a group toggle to avoid unexpected shift-click behavior
-            lastCheckedCheckbox = null;
-            updateActionButtons(); // Update the count and button visibility
-        }
-        // --- End New Function ---
+        // --- Removed handleHeaderClick function ---
 
         function updateActionButtons() {
             const count = selectedItems.size;
@@ -456,44 +404,55 @@
         function deleteSelectedItems() {
             if (selectedItems.size === 0) return;
 
-            console.log("--- Deleting Items (UI Only) ---");
-            const itemsToDeleteByFile = {};
+            console.log("--- Deleting Items ---");
+            const linksToDelete = Array.from(selectedItems);
 
-            selectedItems.forEach(uniqueId => {
-                const itemElement = document.querySelector(`.data-item[data-id="${uniqueId}"]`);
+            // 1. Remove from UI
+            linksToDelete.forEach(link => {
+                const itemElement = document.querySelector(`.data-item[data-id="${link}"]`);
                 if (itemElement) {
-                    const filePath = itemElement.dataset.filePath;
-                    const index = parseInt(itemElement.dataset.index, 10);
-
-                    if (!itemsToDeleteByFile[filePath]) {
-                        itemsToDeleteByFile[filePath] = [];
-                    }
-                    // Store the original index to identify the item in the JSON
-                    itemsToDeleteByFile[filePath].push(index);
-
-                    itemElement.remove(); // Remove from UI
+                    itemElement.remove();
                 }
             });
 
-            // Log intended changes (in a real app, this would trigger backend updates)
-            for (const path in itemsToDeleteByFile) {
-                console.log(`File: ${path}, Indices to delete: ${itemsToDeleteByFile[path].sort((a, b) => b - a).join(', ')}`);
-                // Important: Indices need to be deleted in reverse order to avoid shifting issues
-                const indicesToDelete = itemsToDeleteByFile[path].sort((a, b) => b - a); // Sort descending
-                indicesToDelete.forEach(index => {
-                    if (allData[path] && allData[path][index]) {
-                         console.log(`Simulating deletion of: ${JSON.stringify(allData[path][index])}`);
-                         allData[path].splice(index, 1); // Update in-memory data
-                    }
-                });
-            }
-             console.log("---------------------------------");
+            // 2. Remove from in-memory data
+            linksToDelete.forEach(link => {
+                if (allBlogData[link]) {
+                    console.log(`Simulating deletion of: ${link}`);
+                    delete allBlogData[link]; // Remove from the object
+                }
+            });
 
-
+            // 3. Clear selection
             selectedItems.clear();
             updateActionButtons();
-            // Note: Actual file writing is not performed here.
-            alert('Selected items removed from the view. File updates require backend implementation.');
+
+            // 4. Send linksToDelete to the backend API
+            fetch('/api/results', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ linksToDelete: linksToDelete }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Backend successfully deleted items:', data.message);
+                    alert('선택한 항목이 성공적으로 삭제되었습니다.');
+                } else {
+                    console.error('Backend error deleting items:', data.message);
+                    alert(`항목 삭제 중 서버 오류 발생: ${data.message}\n화면은 업데이트되었지만, 파일 변경사항은 저장되지 않았을 수 있습니다. 페이지를 새로고침 해주세요.`);
+                    // Consider reloading data or reverting UI changes on error
+                    // loadAllData(); // Example: Reload to show actual state
+                }
+            })
+            .catch(error => {
+                console.error('Network error during delete request:', error);
+                alert(`항목 삭제 요청 중 네트워크 오류 발생: ${error}\n화면은 업데이트되었지만, 파일 변경사항은 저장되지 않았을 수 있습니다. 페이지를 새로고침 해주세요.`);
+                 // Consider reloading data or reverting UI changes on error
+                 // loadAllData(); // Example: Reload to show actual state
+            });
         }
 
         function markSelectedItemsComplete() {
@@ -502,58 +461,48 @@
             console.log("--- Processing Completion ---");
 
             const itemsToProcess = [];
-            const processedIds = new Set(); // Keep track of IDs processed
+            const processedLinks = new Set(); // Keep track of links processed
 
             // 1. Gather data for selected items FIRST
-            selectedItems.forEach(uniqueId => {
-                const itemElement = document.querySelector(`.data-item[data-id="${uniqueId}"]`);
-                if (!itemElement) {
-                    console.warn(`Could not find element for selected ID: ${uniqueId}`);
-                    return;
-                }
+            selectedItems.forEach(link => {
+                const itemData = allBlogData[link]; // Get data using link as key
 
-                const filePath = itemElement.dataset.filePath;
-                const index = parseInt(itemElement.dataset.index, 10);
-
-                if (allData[filePath] && allData[filePath][index]) {
-                    const itemData = allData[filePath][index];
-                    const blogUrl = itemData.link; // Use 'link' field from JSON
+                if (itemData) {
+                    const blogUrl = itemData.link; // Should be the same as the key
 
                     if (!blogUrl) {
-                        console.warn(`Skipping item ${uniqueId}: Blog link (URL) not found in data.`);
-                        alert(`데이터 오류: ${uniqueId} 항목에 link(URL)가 없습니다.`);
-                        return; // Skip if no link
+                        console.warn(`Skipping item with key ${link}: Blog link (URL) not found in data.`);
+                        alert(`데이터 오류: ${link} 항목에 link(URL)가 없습니다.`);
+                        return; // Skip if no link (shouldn't happen if link is the key)
                     }
 
                     itemsToProcess.push({
-                        uniqueId: uniqueId,
+                        uniqueId: link, // Use link as the identifier
                         blogUrl: blogUrl,
                         title: itemData.title,
                         region: itemData.city, // Assuming 'city' maps to region
-                        keyword: itemData.keyword,
-                        filePath: filePath,
-                        index: index
+                        keyword: itemData.keyword
+                        // No filePath or index needed anymore
                     });
 
                 } else {
-                     console.warn(`Could not find data for selected ID: ${uniqueId} (Path: ${filePath}, Index: ${index})`);
-                     alert(`데이터 오류: ${uniqueId} 항목의 정보를 찾을 수 없습니다.`);
+                     console.warn(`Could not find data for selected link: ${link}`);
+                     alert(`데이터 오류: ${link} 항목의 정보를 찾을 수 없습니다.`);
                 }
             });
 
             if (itemsToProcess.length === 0) {
                  console.log("No valid items to process.");
-                 // Clear selection even if nothing was processed
                  selectedItems.clear();
                  updateActionButtons();
                  return;
             }
 
-            // 2. Send requests to backend
+            // 2. Send download requests to backend
             console.log(`Sending ${itemsToProcess.length} download requests...`);
             const downloadPromises = itemsToProcess.map(item => {
                  console.log(`Requesting download for: ${item.blogUrl} (Title: ${item.title}, Region: ${item.region}, Keyword: ${item.keyword})`);
-                 return fetch('/api/download-blog', {
+                 return fetch('/api/download-blog', { // This endpoint handles the actual download/processing
                      method: 'POST',
                      headers: {
                          'Content-Type': 'application/json',
@@ -569,7 +518,7 @@
                  .then(data => {
                      if (data.success) {
                          console.log(`Download successful for ${item.blogUrl}: ${data.folderPath}`);
-                         processedIds.add(item.uniqueId); // Mark as successfully processed
+                         processedLinks.add(item.uniqueId); // Mark link as successfully processed for status update
                      } else {
                          console.error(`Download failed for ${item.blogUrl}: ${data.message || 'Unknown error'}`);
                          alert(`블로그 다운로드 실패: ${item.blogUrl}\n${data.message || ''}`);
@@ -583,93 +532,109 @@
                  });
             });
 
-            // 3. Wait for all requests and update UI for successfully processed items
-            Promise.all(downloadPromises).then((results) => {
+            // 3. Wait for all download requests
+            Promise.all(downloadPromises).then(async (results) => { // Make callback async
                 console.log("All download requests finished.");
-                let successCount = 0;
+                const successCount = processedLinks.size;
 
-                processedIds.forEach(uniqueId => {
-                     const itemElement = document.querySelector(`.data-item[data-id="${uniqueId}"]`);
+                // 4. Update UI and in-memory data for successfully downloaded items
+                processedLinks.forEach(link => {
+                     const itemElement = document.querySelector(`.data-item[data-id="${link}"]`);
                      const checkbox = itemElement?.querySelector('input[type="checkbox"]');
                      if (itemElement) {
-                         // Update UI
+                         // Update UI status
                          const statusSpan = itemElement.querySelector('.status');
                          if (statusSpan) {
                              statusSpan.classList.remove('status-pending');
                              statusSpan.classList.add('status-extracted');
-                             statusSpan.textContent = '완료'; // Changed from 'Completed'
+                             statusSpan.textContent = '완료';
                          }
-
-                         // Update in-memory data (optional but good practice)
-                         const filePath = itemElement.dataset.filePath;
-                         const index = parseInt(itemElement.dataset.index, 10);
-                         if (allData[filePath] && allData[filePath][index]) {
-                             allData[filePath][index].extracted = true;
+                         // Update in-memory data status
+                         if (allBlogData[link]) {
+                             allBlogData[link].extracted = true;
                          }
-
                          // Uncheck and deselect visually
                          itemElement.classList.remove('selected');
                          if (checkbox) checkbox.checked = false;
-                         successCount++;
                      }
                 });
 
-                // 4. Clear selection and update buttons
+                // 5. If any downloads were successful, update status on the backend
+                if (successCount > 0) {
+                    console.log(`Updating status for ${successCount} items on backend...`);
+                    try {
+                        const statusUpdateResponse = await fetch('/api/results/status', {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ linksToUpdate: Array.from(processedLinks) }),
+                        });
+                        const statusUpdateData = await statusUpdateResponse.json();
+                        if (statusUpdateData.success) {
+                            console.log('Backend status update successful:', statusUpdateData.message);
+                        } else {
+                            console.error('Backend error updating status:', statusUpdateData.message);
+                            alert(`다운로드 상태 업데이트 중 서버 오류 발생: ${statusUpdateData.message}\n페이지를 새로고침 해주세요.`);
+                        }
+                    } catch (error) {
+                         console.error('Network error during status update request:', error);
+                         alert(`다운로드 상태 업데이트 요청 중 네트워크 오류 발생: ${error}\n페이지를 새로고침 해주세요.`);
+                    }
+                }
+
+                // 6. Clear selection and update buttons
                 selectedItems.clear();
                 updateActionButtons();
 
                 alert(`${successCount} / ${itemsToProcess.length}개 항목의 다운로드 요청이 성공적으로 처리되었습니다. 실패한 항목은 콘솔을 확인하세요.`);
 
-                // Optionally reload data to reflect changes persisted on the backend (if any)
-                // loadAllData();
+                // No need to reload data unless there were errors during status update
             });
         }
+
 
         async function loadAllData() {
             loadingIndicator.classList.remove('hidden');
             dataContainer.innerHTML = '<div id="loading" class="p-8 text-center text-gray-600">데이터 로딩 중...</div>'; // Show loading
-            allData = {}; // Clear previous data
+            allBlogData = {}; // Clear previous data
             uniqueKeywords.clear(); // Clear previous filters
             uniqueRegions.clear(); // Clear previous filters
-            currentFilter = { keyword: null, region: null }; // Reset filters on load
+            currentFilter = { keyword: null, region: null, status: null }; // Reset status filter on load
 
             try {
-                // 1. Fetch the list of JSON filenames from the server
-                const response = await fetch('/api/results');
+                // 1. Fetch data from the API endpoint
+                const response = await fetch('/api/results'); // Fetch from the new GET endpoint
                 if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ message: 'Failed to fetch file list.' }));
+                    const errorData = await response.json().catch(() => ({ message: 'Failed to fetch results data.' }));
                     throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
                 }
-                const result = await response.json();
 
-                if (!result.success || !result.files || result.files.length === 0) {
+                const result = await response.json();
+                if (!result.success || typeof result.data !== 'object' || result.data === null || Array.isArray(result.data)) {
+                     console.warn('API did not return a valid data object:', result);
+                     allBlogData = {};
+                } else {
+                    allBlogData = result.data;
+                }
+
+
+                if (Object.keys(allBlogData).length === 0) {
                     loadingIndicator.classList.add('hidden');
-                    dataContainer.innerHTML = '<div class="p-8 text-center text-gray-500">결과 폴더에서 JSON 파일을 찾을 수 없습니다.</div>';
+                    dataContainer.innerHTML = '<div class="p-8 text-center text-gray-500">표시할 데이터가 없습니다.</div>';
+                    renderFilters(); // Render empty filters
                     updateActionButtons();
                     return;
                 }
 
-                const fetchedFilePaths = result.files.map(filename => `result/${filename}`); // Construct full paths
 
-                // 2. Fetch data for each file
-                const promises = fetchedFilePaths.map(async (filePath) => {
-                    const data = await fetchData(filePath);
-                    if (data && data.length > 0) { // Only store if data is valid and not empty
-                       allData[filePath] = data;
-                    } else {
-                        console.warn(`No valid data found or empty file: ${filePath}`);
-                    }
-                });
-
-                await Promise.all(promises);
-
-                // 3. Extract unique keywords and regions from all loaded data
-                Object.values(allData).flat().forEach(item => {
+                // 2. Extract unique keywords and regions from the loaded data object
+                Object.values(allBlogData).forEach(item => {
                     if (item.keyword) uniqueKeywords.add(item.keyword);
                     if (item.city) uniqueRegions.add(item.city); // Assuming 'city' is the field for region
                 });
 
-                // 4. Render filters and then data
+                // 3. Render filters and then data
                 renderFilters(); // Render filter buttons first
                 renderData(); // Render data (initially unfiltered)
 
@@ -678,7 +643,7 @@
                 renderFilters(); // Still try to render filters even on error? Maybe hide them.
                 filterContainer.classList.add('hidden'); // Hide filters on error
                 loadingIndicator.classList.add('hidden');
-                dataContainer.innerHTML = `<div class="p-8 text-center text-red-600">데이터 로딩 실패: ${error.message}</div>`;
+                dataContainer.innerHTML = `<div class="p-8 text-center text-red-600">데이터 로딩 실패: ${error.message || String(error)}</div>`;
             } finally {
                  // Ensure loading indicator is hidden even if renderData clears it
                 const currentLoading = dataContainer.querySelector('#loading');
